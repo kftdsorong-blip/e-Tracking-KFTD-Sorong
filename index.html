@@ -212,9 +212,9 @@
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <!-- Filter Tanggal Pengiriman Baru -->
+                    <!-- Filter Tanggal Billing (Kolom B) -->
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-xs">
-                        <span class="text-slate-500 font-medium">Tgl Kirim:</span>
+                        <span class="text-slate-500 font-medium">Tgl Billing:</span>
                         <input type="date" id="filter-date" onchange="renderTable()" class="bg-transparent focus:outline-none text-slate-700">
                         <button onclick="clearDateFilter()" class="text-rose-500 hover:text-rose-700 ml-1" title="Reset Filter Tanggal"><i class="fa-solid fa-xmark"></i></button>
                     </div>
@@ -313,7 +313,6 @@
 
         // Fungsi Scan Barcode / Terjemah Barcode ke No Billing secara akurat
         function handleBarcodeScan(val) {
-            // Bersihkan teks barcode (misal jika ada karakter khusus dari scanner hardware)
             const cleanVal = val.trim();
             if(cleanVal.length >= 4) {
                 generateBarcodeVisual(cleanVal);
@@ -328,7 +327,6 @@
 
         function searchBillingByValue(query) {
             if(!query) return;
-            // Pencocokan akurat: cari yang sama persis atau berakhiran dengan query scanner
             const item = invoiceData.find(i => i.NoBilling === query || i.NoBilling.endsWith(query) || i.NoBilling.includes(query));
             
             if (item) {
@@ -343,6 +341,22 @@
                 document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
             } else {
                 document.getElementById('form-message').innerText = 'Faktur tidak ditemukan.';
+            }
+        }
+
+        function generateBarcodeVisual(code) {
+            try {
+                JsBarcode("#barcode-display", code, {
+                    format: "CODE128",
+                    lineColor: "#0f172a",
+                    width: 2,
+                    height: 42,
+                    displayValue: true,
+                    fontSize: 11,
+                    margin: 0
+                });
+            } catch (e) {
+                console.error("Barcode generation error", e);
             }
         }
 
@@ -484,24 +498,23 @@
                                       item.NoBilling.includes(search) || 
                                       item.Salesman.toLowerCase().includes(search);
                 
-                // Filter berdasarkan Status KPI
                 let matchesKPI = true;
                 if (activeFilter === 'DONE') matchesKPI = (item.Dokumentasi === 'DONE');
                 else if (activeFilter === 'PENDING') matchesKPI = (item.Dokumentasi !== 'DONE');
                 else if (activeFilter === 'ADA SP') matchesKPI = (item.SP && item.SP.startsWith('http'));
                 else if (activeFilter === 'TIDAK ADA SP') matchesKPI = (!item.SP || !item.SP.startsWith('http'));
 
-                // Filter berdasarkan Tanggal Pengiriman (item.TglKirim format DD/MM/YYYY)
+                // Filter berdasarkan Tanggal Billing (Kolom B / item.BillingDate format DD/MM/YYYY)
                 let matchesDate = true;
-                if (selectedDate && item.TglKirim) {
-                    const parts = item.TglKirim.split('/');
+                if (selectedDate && item.BillingDate) {
+                    const parts = item.BillingDate.split('/');
                     if (parts.length === 3) {
                         const itemDateFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
                         matchesDate = (itemDateFormatted === selectedDate);
                     } else {
                         matchesDate = false;
                     }
-                } else if (selectedDate && !item.TglKirim) {
+                } else if (selectedDate && !item.BillingDate) {
                     matchesDate = false;
                 }
 
