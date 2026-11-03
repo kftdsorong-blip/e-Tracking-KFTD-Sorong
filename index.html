@@ -11,7 +11,7 @@
     <!-- JsBarcode CDN -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-fontawesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .active-kpi {
             border: 2px solid #2563eb;
@@ -250,7 +250,6 @@
     <script>
         let invoiceData = [];
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
-        const IMGBB_API_KEY = "3b8a1c84ec69d1ec9c7e3f7fbb18b068"; // Free API Key for automatic image hosting
 
         let activeFilter = 'ALL';
         let salesmanChart, barangChart;
@@ -369,56 +368,33 @@
                 const fileInput = document.getElementById('form-sp');
                 
                 document.getElementById('btn-submit').disabled = true;
+                document.getElementById('form-message').innerText = '⏳ Memproses data & foto...';
 
                 if (fileInput.files && fileInput.files[0]) {
-                    document.getElementById('form-message').innerText = '⏳ Mengunggah foto bukti fisik...';
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
                     
-                    const formData = new FormData();
-                    formData.append("image", fileInput.files[0]);
-
-                    // Upload foto langsung ke cloud publik ImgBB untuk menghasilkan link URL valid
-                    fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(resData => {
-                        if (resData && resData.data && resData.data.url) {
-                            const imageUrl = resData.data.url;
-                            sendDataToBackend({
-                                NoBilling: noBilling,
-                                TglKirim: tglKirim,
-                                DateReceive: tglTerima,
-                                Dokumentasi: statusDok,
-                                SP: imageUrl
-                            });
-                        } else {
-                            throw new Error("Gagal mendapatkan link gambar.");
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Upload error:", err);
-                        document.getElementById('form-message').innerText = '⚠️ Gagal unggah foto. Menyimpan tanpa foto...';
+                    reader.onload = function(uploadEvent) {
+                        const base64Content = uploadEvent.target.result.split(',')[1];
                         sendDataToBackend({
                             NoBilling: noBilling,
                             TglKirim: tglKirim,
                             DateReceive: tglTerima,
                             Dokumentasi: statusDok,
-                            SP: invoiceData[index].SP || ''
+                            fileName: file.name,
+                            mimeType: file.type,
+                            fileData: base64Content
                         });
-                    });
-
+                    };
+                    reader.readAsDataURL(file);
                 } else {
-                    document.getElementById('form-message').innerText = '⏳ Menyimpan data...';
                     sendDataToBackend({
                         NoBilling: noBilling,
                         TglKirim: tglKirim,
                         DateReceive: tglTerima,
-                        Dokumentasi: statusDok,
-                        SP: invoiceData[index].SP || ''
+                        Dokumentasi: statusDok
                     });
                 }
-
             } else {
                 alert('Pilih atau masukkan No. Billing terlebih dahulu!');
             }
@@ -430,12 +406,12 @@
                 mode: "no-cors",
                 body: JSON.stringify(payload)
             }).then(() => {
-                document.getElementById('form-message').innerText = '✅ Berhasil tersimpan! Memperbarui data...';
+                document.getElementById('form-message').innerText = '✅ Berhasil tersimpan ke Drive & Spreadsheet!';
                 document.getElementById('btn-submit').disabled = false;
                 setTimeout(() => loadDataFromSheets(), 1500);
             }).catch(error => {
                 console.error("Error:", error);
-                document.getElementById('form-message').innerText = '⚠️ Gagal menyinkronkan ke Spreadsheet.';
+                document.getElementById('form-message').innerText = '⚠️ Gagal menyimpan.';
                 document.getElementById('btn-submit').disabled = false;
             });
         }
