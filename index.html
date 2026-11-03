@@ -141,7 +141,7 @@
 
                         <div class="flex justify-between items-center pt-2">
                             <span id="form-message" class="text-xs text-emerald-600 font-medium"></span>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-sm">
+                            <button type="submit" id="btn-submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-sm">
                                 <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan & Update Tracking
                             </button>
                         </div>
@@ -364,53 +364,67 @@
             if (index !== -1) {
                 const tglKirim = document.getElementById('form-tgl-kirim').value;
                 const tglTerima = document.getElementById('form-tgl-terima').value;
-                
-                const fileInput = document.getElementById('form-sp');
-                let statusSP = invoiceData[index].SP || '';
-                if (fileInput.files && fileInput.files[0]) {
-                    statusSP = "Foto: " + fileInput.files[0].name;
-                }
-
                 const statusDok = document.getElementById('form-status').value;
+                const fileInput = document.getElementById('form-sp');
+                
+                document.getElementById('form-message').innerText = '⏳ Mengunggah foto ke Google Drive...';
+                document.getElementById('btn-submit').disabled = true;
 
-                invoiceData[index].TglKirim = tglKirim;
-                invoiceData[index].DateReceive = tglTerima;
-                invoiceData[index].SP = statusSP;
-                invoiceData[index].Dokumentasi = statusDok;
-
-                document.getElementById('form-message').innerText = '⏳ Menyimpan ke Google Spreadsheet...';
-
-                fetch(WEB_APP_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    body: JSON.stringify({
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(uploadEvent) {
+                        const base64Data = uploadEvent.target.result.split(',')[1];
+                        
+                        sendDataToBackend({
+                            NoBilling: noBilling,
+                            TglKirim: tglKirim,
+                            DateReceive: tglTerima,
+                            Dokumentasi: statusDok,
+                            fotoBase64: base64Data,
+                            namaFile: file.name,
+                            mimeType: file.type
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    sendDataToBackend({
                         NoBilling: noBilling,
                         TglKirim: tglKirim,
                         DateReceive: tglTerima,
-                        SP: statusSP,
-                        Dokumentasi: statusDok
-                    })
-                }).then(() => {
-                    document.getElementById('form-message').innerText = `✅ Data #${noBilling} berhasil diperbarui di Spreadsheet!`;
-                    updateKPIs();
-                    updateCharts();
-                    renderTable();
-                }).catch(error => {
-                    console.error("Error:", error);
-                    document.getElementById('form-message').innerText = '⚠️ Gagal menyinkronkan ke Spreadsheet.';
-                });
+                        Dokumentasi: statusDok,
+                        SP: invoiceData[index].SP || ''
+                    });
+                }
 
             } else {
                 alert('Pilih atau masukkan No. Billing terlebih dahulu!');
             }
         }
 
+        function sendDataToBackend(payload) {
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(payload)
+            }).then(() => {
+                document.getElementById('form-message').innerText = '✅ Berhasil diperbarui! Klik Sinkronkan.';
+                document.getElementById('btn-submit').disabled = false;
+                loadDataFromSheets();
+            }).catch(error => {
+                console.error("Error:", error);
+                document.getElementById('form-message').innerText = '⚠️ Gagal menyinkronkan ke Spreadsheet.';
+                document.getElementById('btn-submit').disabled = false;
+            });
+        }
+
         function updateKPIs() {
             const totalKomersil = invoiceData.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const doneCount = invoiceData.filter(i => i.Dokumentasi === 'DONE').length;
             const pendingCount = invoiceData.filter(i => i.Dokumentasi !== 'DONE').length;
-            const adaSP = invoiceData.filter(i => i.SP && i.SP !== '').length;
-            const tidakSP = invoiceData.filter(i => !i.SP || i.SP === '').length;
+            const adaSP = invoiceData.filter(i => i.SP && i.SP.startsWith('http')).length;
+            const tidakSP = invoiceData.filter(i => !i.SP || !i.SP.startsWith('http')).length;
 
             document.getElementById('kpi-total-komersil').innerText = formatRp(totalKomersil);
             document.getElementById('kpi-done-count').innerText = doneCount;
@@ -445,26 +459,35 @@
                 if (activeFilter === 'ALL') return matchesSearch;
                 if (activeFilter === 'DONE') return matchesSearch && item.Dokumentasi === 'DONE';
                 if (activeFilter === 'PENDING') return matchesSearch && item.Dokumentasi !== 'DONE';
-                if (activeFilter === 'ADA SP') return matchesSearch && (item.SP && item.SP !== '');
-                if (activeFilter === 'TIDAK ADA SP') return matchesSearch && (!item.SP || item.SP === '');
+                if (activeFilter === 'ADA SP') return matchesSearch && (item.SP && item.SP.startsWith('http'));
+                if (activeFilter === 'TIDAK ADA SP') return matchesSearch && (!item.SP || !item.SP.startsWith('http'));
                 return matchesSearch;
             });
 
-            tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-3 font-mono font-bold text-blue-600">#${item.NoBilling}</td>
-                    <td class="p-3 text-slate-500">${item.BillingDate}</td>
-                    <td class="p-3 font-semibold text-slate-800">${item.ShipTo}</td>
-                    <td class="p-3 text-slate-600">${item.Kota}</td>
-                    <td class="p-3 text-slate-600">${item.Salesman}</td>
-                    <td class="p-3 text-right font-bold text-slate-800">${formatRp(item.Komersil)}</td>
-                    <td class="p-3 text-slate-600">${item.Barang}</td>
-                    <td class="p-3 text-slate-500">${item.TglKirim || '-'}</td>
-                    <td class="p-3 text-slate-500">${item.DateReceive || '-'}</td>
-                    <td class="p-3 text-center text-slate-600 truncate max-w-[120px]">${item.SP || '-'}</td>
-                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${item.Dokumentasi}</span></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(item => {
+                let spDisplay = '-';
+                if (item.SP && item.SP.startsWith('http')) {
+                    spDisplay = `<a href="${item.SP}" target="_blank" class="text-blue-600 underline font-semibold"><i class="fa-solid fa-image mr-1"></i> Buka Foto</a>`;
+                } else if (item.SP) {
+                    spDisplay = item.SP;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-blue-600">#${item.NoBilling}</td>
+                        <td class="p-3 text-slate-500">${item.BillingDate}</td>
+                        <td class="p-3 font-semibold text-slate-800">${item.ShipTo}</td>
+                        <td class="p-3 text-slate-600">${item.Kota}</td>
+                        <td class="p-3 text-slate-600">${item.Salesman}</td>
+                        <td class="p-3 text-right font-bold text-slate-800">${formatRp(item.Komersil)}</td>
+                        <td class="p-3 text-slate-600">${item.Barang}</td>
+                        <td class="p-3 text-slate-500">${item.TglKirim || '-'}</td>
+                        <td class="p-3 text-slate-500">${item.DateReceive || '-'}</td>
+                        <td class="p-3 text-center">${spDisplay}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${item.Dokumentasi}</span></td>
+                    </tr>
+                `;
+            }).join('');
             
             document.getElementById('active-filter-label').innerText = `Menampilkan ${filtered.length} dari ${invoiceData.length} Faktur`;
         }
