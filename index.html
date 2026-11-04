@@ -418,8 +418,14 @@
             if (index !== -1) {
                 const tglKirim = document.getElementById('form-tgl-kirim').value;
                 const tglTerima = document.getElementById('form-tgl-terima').value;
-                const statusDok = document.getElementById('form-status').value;
+                let statusDok = document.getElementById('form-status').value;
                 const fileInput = document.getElementById('form-sp');
+                
+                // Jika ada foto yang diunggah, otomatis set status menjadi DONE agar langsung tersimpan
+                if (fileInput.files && fileInput.files[0]) {
+                    statusDok = 'DONE';
+                    document.getElementById('form-status').value = 'DONE';
+                }
                 
                 document.getElementById('btn-submit').disabled = true;
                 document.getElementById('form-message').innerText = '⏳ Mengompres & memproses foto...';
