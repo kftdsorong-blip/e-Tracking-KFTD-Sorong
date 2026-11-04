@@ -311,7 +311,6 @@
             searchBilling();
         }
 
-        // Fungsi Scan Barcode / Terjemah Barcode ke No Billing secara akurat
         function handleBarcodeScan(val) {
             const cleanVal = val.trim();
             if(cleanVal.length >= 4) {
@@ -504,13 +503,21 @@
                 else if (activeFilter === 'ADA SP') matchesKPI = (item.SP && item.SP.startsWith('http'));
                 else if (activeFilter === 'TIDAK ADA SP') matchesKPI = (!item.SP || !item.SP.startsWith('http'));
 
-                // Filter berdasarkan Tanggal Billing (Kolom B / item.BillingDate format DD/MM/YYYY)
+                // Filter berdasarkan Tanggal Billing (Kolom B / item.BillingDate) fleksibel untuk format D/M/YYYY atau DD/MM/YYYY
                 let matchesDate = true;
                 if (selectedDate && item.BillingDate) {
+                    const [sYear, sMonth, sDay] = selectedDate.split('-');
+                    const targetDay = parseInt(sDay, 10);
+                    const targetMonth = parseInt(sMonth, 10);
+                    const targetYear = parseInt(sYear, 10);
+
                     const parts = item.BillingDate.split('/');
                     if (parts.length === 3) {
-                        const itemDateFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                        matchesDate = (itemDateFormatted === selectedDate);
+                        const itemDay = parseInt(parts[0], 10);
+                        const itemMonth = parseInt(parts[1], 10);
+                        const itemYear = parseInt(parts[2], 10);
+
+                        matchesDate = (itemDay === targetDay && itemMonth === targetMonth && itemYear === targetYear);
                     } else {
                         matchesDate = false;
                     }
