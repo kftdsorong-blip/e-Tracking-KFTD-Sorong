@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- JsBarcode CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- HTML5-QRCode Scanner CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <!-- FontAwesome Icons -->
@@ -19,14 +17,6 @@
             border: 2px solid #2563eb;
             box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
             transform: translateY(-2px);
-        }
-        @keyframes scanLaser {
-            0% { top: 10%; }
-            50% { top: 90%; }
-            100% { top: 10%; }
-        }
-        .laser-line {
-            animation: scanLaser 2s infinite ease-in-out;
         }
     </style>
 </head>
@@ -71,15 +61,15 @@
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-xs text-slate-400 font-semibold">SCAN / MASUKKAN NO. BILLING</label>
-                            <button type="button" onclick="toggleCameraScanner()" id="btn-toggle-cam" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-all">
+                            <button type="button" onclick="toggleCameraScanner()" id="btn-toggle-cam" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-all">
                                 <i class="fa-solid fa-camera"></i> Buka Kamera HP
                             </button>
                         </div>
 
-                        <!-- Area Kamera HP (Hidden secara default) -->
+                        <!-- Area Kamera HP (Sensitivitas Tinggi) -->
                         <div id="reader-container" class="hidden mb-3 bg-black rounded-lg overflow-hidden border border-slate-700 relative">
                             <div id="interactive-reader" class="w-full"></div>
-                            <button type="button" onclick="stopCameraScanner()" class="absolute top-2 right-2 bg-rose-600 text-white px-2 py-0.5 rounded text-[10px] font-bold z-20">Tutup</button>
+                            <button type="button" onclick="stopCameraScanner()" class="absolute top-2 right-2 bg-rose-600 text-white px-2.5 py-1 rounded text-[10px] font-bold z-20 shadow">Tutup Kamera</button>
                         </div>
 
                         <div class="relative mb-3">
@@ -88,12 +78,6 @@
                             <button onclick="searchBilling()" class="absolute right-2 top-2 text-slate-400 hover:text-white">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                             </button>
-                        </div>
-
-                        <!-- Visual Barcode & Laser Scanner Animation -->
-                        <div class="bg-white p-3 rounded-lg border border-slate-700 flex flex-col items-center justify-center relative overflow-hidden min-h-[80px]">
-                            <div class="absolute inset-x-0 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] laser-line z-10"></div>
-                            <svg id="barcode-display" class="w-full max-h-16"></svg>
                         </div>
                     </div>
                     
@@ -299,7 +283,6 @@
                         updateCharts();
                     }
                     renderTable();
-                    if(invoiceData.length > 0) generateBarcodeVisual(invoiceData[0].NoBilling);
                 })
                 .catch(error => {
                     console.error("Gagal memuat data:", error);
@@ -308,7 +291,7 @@
                 });
         }
 
-        // Fungsi Kamera HP Scanner
+        // Fungsi Kamera HP Scanner (Sensitivitas Tinggi & Fokus Diperluas)
         function toggleCameraScanner() {
             const container = document.getElementById('reader-container');
             const btnCam = document.getElementById('btn-toggle-cam');
@@ -319,24 +302,30 @@
                 btnCam.classList.replace('bg-blue-600', 'bg-rose-600');
                 
                 html5QrCode = new Html5Qrcode("interactive-reader");
+                
+                // Konfigurasi kamera dengan sensitivitas tinggi untuk berbagai jenis barcode 1D/2D
+                const qrConfig = {
+                    fps: 15, // Frame per second lebih tinggi agar lebih responsif menangkap gambar
+                    qrbox: { width: 300, height: 120 }, // Kotak area pindai diperlebar
+                    aspectRatio: 1.777778
+                };
+
                 html5QrCode.start(
-                    { facingMode: "environment" }, // Menggunakan kamera belakang HP
-                    {
-                        fps: 10,
-                        qrbox: { width: 250, height: 100 }
-                    },
+                    { facingMode: "environment" }, // Kamera belakang HP
+                    qrConfig,
                     (decodedText, decodedResult) => {
-                        // Ketika barcode berhasil dibaca kamera
-                        document.getElementById('scan-input').value = decodedText;
-                        handleBarcodeScan(decodedText);
+                        // Ketika barcode terbaca dengan sukses
+                        const cleanCode = decodedText.trim();
+                        document.getElementById('scan-input').value = cleanCode;
+                        handleBarcodeScan(cleanCode);
                         stopCameraScanner();
                     },
                     (errorMessage) => {
-                        // Scan berjalan (mengabaikan error frame kosong)
+                        // Mengabaikan frame kosong saat kamera mencari barcode agar proses ringan
                     }
                 ).catch(err => {
                     console.error("Gagal membuka kamera:", err);
-                    alert("Gagal mengakses kamera. Pastikan izin kamera di browser telah diizinkan.");
+                    alert("Gagal mengakses kamera. Pastikan izin kamera pada browser telah diaktifkan.");
                     stopCameraScanner();
                 });
 
@@ -391,7 +380,6 @@
         function handleBarcodeScan(val) {
             const cleanVal = val.trim();
             if(cleanVal.length >= 4) {
-                generateBarcodeVisual(cleanVal);
                 searchBillingByValue(cleanVal);
             }
         }
@@ -403,11 +391,11 @@
 
         function searchBillingByValue(query) {
             if(!query) return;
+            // Pencocokan fleksibel dan sensitif (persis, berakhiran, atau mengandung string)
             const item = invoiceData.find(i => i.NoBilling === query || i.NoBilling.endsWith(query) || i.NoBilling.includes(query));
             
             if (item) {
                 document.getElementById('scan-input').value = item.NoBilling;
-                generateBarcodeVisual(item.NoBilling);
                 document.getElementById('form-outlet').value = item.ShipTo;
                 document.getElementById('form-salesman').value = item.Salesman;
                 document.getElementById('form-komersil').value = formatRp(item.Komersil);
@@ -417,22 +405,6 @@
                 document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
             } else {
                 document.getElementById('form-message').innerText = 'Faktur tidak ditemukan.';
-            }
-        }
-
-        function generateBarcodeVisual(code) {
-            try {
-                JsBarcode("#barcode-display", code, {
-                    format: "CODE128",
-                    lineColor: "#0f172a",
-                    width: 2,
-                    height: 42,
-                    displayValue: true,
-                    fontSize: 11,
-                    margin: 0
-                });
-            } catch (e) {
-                console.error("Barcode generation error", e);
             }
         }
 
