@@ -83,13 +83,10 @@
                     <p class="text-xs text-slate-500" id="active-filter-label">Memuat data dari Google Spreadsheet...</p>
                 </div>
                 
-                <!-- Filter Section -->
+                <!-- Filter Section (Tanpa Cari Admin Logistik) -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                     <!-- Filter No Billing -->
-                    <input type="text" id="filter-billing" oninput="renderInkasoTable()" placeholder="Cari No. Billing..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-36">
-                    
-                    <!-- Filter Admin Logistik -->
-                    <input type="text" id="filter-admin" oninput="renderInkasoTable()" placeholder="Cari Admin Logistik..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-36">
+                    <input type="text" id="filter-billing" oninput="renderInkasoTable()" placeholder="Cari No. Billing..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-44">
                     
                     <!-- Filter Status Invoice -->
                     <select id="filter-status-invoice" onchange="renderInkasoTable()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
@@ -227,7 +224,6 @@
             document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active-kpi'));
             document.querySelectorAll('.kpi-card')[0].classList.add('active-kpi');
             document.getElementById('filter-billing').value = '';
-            document.getElementById('filter-admin').value = '';
             document.getElementById('filter-status-invoice').value = '';
             renderInkasoTable();
         }
@@ -235,7 +231,6 @@
         function renderInkasoTable() {
             const tbody = document.getElementById('inkaso-tbody');
             const filterBilling = document.getElementById('filter-billing').value.toLowerCase();
-            const filterAdmin = document.getElementById('filter-admin').value.toLowerCase();
             const filterStatusInv = document.getElementById('filter-status-invoice').value.toUpperCase();
 
             let filtered = inkasoData.filter(item => {
@@ -251,10 +246,9 @@
                 }
 
                 const matchBilling = !filterBilling || (item.NoBilling && item.NoBilling.toLowerCase().includes(filterBilling));
-                const matchAdmin = !filterAdmin || (item.AdminLogistik && item.AdminLogistik.toLowerCase().includes(filterAdmin));
                 const matchStatusInv = !filterStatusInv || (item.StatusInvoice && item.StatusInvoice.toUpperCase().includes(filterStatusInv));
 
-                return matchAging && matchBilling && matchAdmin && matchStatusInv;
+                return matchAging && matchBilling && matchStatusInv;
             });
 
             tbody.innerHTML = filtered.map(item => {
