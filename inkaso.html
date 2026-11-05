@@ -42,34 +42,38 @@
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- KPI / Summary Cards Interactive Filter (Jatuh Tempo) -->
+        <!-- KPI / Summary Cards Interactive Filter (Jatuh Tempo & Total Komersil) -->
         <section class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <!-- Card All -->
             <div onclick="filterAging('ALL', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all active-kpi">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Semua Faktur</p>
-                <h3 class="text-2xl font-extrabold text-slate-900 mt-1" id="kpi-total-faktur">0</h3>
-                <span class="text-[11px] text-emerald-600 font-medium">Klik untuk tampilkan semua</span>
+                <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-faktur">0</h3>
+                <p class="text-xs font-bold text-emerald-700 mt-0.5" id="kpi-total-komersil">Rp 0</p>
+                <span class="text-[10px] text-emerald-600 font-medium">Klik untuk tampilkan semua</span>
             </div>
 
             <!-- Card TOP 30 Hari -->
             <div onclick="filterAging('30', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (<= 30 Hari)</p>
-                <h3 class="text-2xl font-extrabold text-blue-600 mt-1" id="kpi-30-count">0</h3>
-                <span class="text-[11px] text-blue-700 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">Proses Lancar</span>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&lt;= 30 Hari)</p>
+                <h3 class="text-xl font-extrabold text-blue-600 mt-1" id="kpi-30-count">0</h3>
+                <p class="text-xs font-bold text-blue-700 mt-0.5" id="kpi-30-komersil">Rp 0</p>
+                <span class="text-[10px] text-blue-700 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">Proses Lancar</span>
             </div>
 
             <!-- Card > 45 Hari -->
             <div onclick="filterAging('45', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (> 45 Hari)</p>
-                <h3 class="text-2xl font-extrabold text-amber-600 mt-1" id="kpi-45-count">0</h3>
-                <span class="text-[11px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Perlu Atensi</span>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 45 Hari)</p>
+                <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-45-count">0</h3>
+                <p class="text-xs font-bold text-amber-700 mt-0.5" id="kpi-45-komersil">Rp 0</p>
+                <span class="text-[10px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Perlu Atensi</span>
             </div>
 
             <!-- Card > 90 Hari -->
             <div onclick="filterAging('90', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-rose-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (> 90 Hari)</p>
-                <h3 class="text-2xl font-extrabold text-rose-600 mt-1" id="kpi-90-count">0</h3>
-                <span class="text-[11px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Kritis / Overdue</span>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 90 Hari)</p>
+                <h3 class="text-xl font-extrabold text-rose-600 mt-1" id="kpi-90-count">0</h3>
+                <p class="text-xs font-bold text-rose-700 mt-0.5" id="kpi-90-komersil">Rp 0</p>
+                <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Kritis / Overdue</span>
             </div>
         </section>
 
@@ -83,7 +87,7 @@
                     <p class="text-xs text-slate-500" id="active-filter-label">Memuat data dari Google Spreadsheet...</p>
                 </div>
                 
-                <!-- Filter Section (Tanpa Cari Admin Logistik) -->
+                <!-- Filter Section -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                     <!-- Filter No Billing -->
                     <input type="text" id="filter-billing" oninput="renderInkasoTable()" placeholder="Cari No. Billing..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-44">
@@ -201,15 +205,27 @@
         }
 
         function updateKPIs() {
-            const totalFaktur = inkasoData.length;
-            const count30 = inkasoData.filter(i => getAgingDays(i.BillingDate) <= 30).length;
-            const count45 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 45 && getAgingDays(i.BillingDate) <= 90).length;
-            const count90 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 90).length;
+            const listAll = inkasoData;
+            const list30 = inkasoData.filter(i => getAgingDays(i.BillingDate) <= 30);
+            const list45 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 45 && getAgingDays(i.BillingDate) <= 90);
+            const list90 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 90);
 
-            document.getElementById('kpi-total-faktur').innerText = totalFaktur;
-            document.getElementById('kpi-30-count').innerText = count30;
-            document.getElementById('kpi-45-count').innerText = count45;
-            document.getElementById('kpi-90-count').innerText = count90;
+            // Hitung total jumlah faktur
+            document.getElementById('kpi-total-faktur').innerText = listAll.length;
+            document.getElementById('kpi-30-count').innerText = list30.length;
+            document.getElementById('kpi-45-count').innerText = list45.length;
+            document.getElementById('kpi-90-count').innerText = list90.length;
+
+            // Hitung total nilai komersil
+            const sumAll = listAll.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+            const sum30 = list30.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+            const sum45 = list45.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+            const sum90 = list90.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+
+            document.getElementById('kpi-total-komersil').innerText = formatRp(sumAll);
+            document.getElementById('kpi-30-komersil').innerText = formatRp(sum30);
+            document.getElementById('kpi-45-komersil').innerText = formatRp(sum45);
+            document.getElementById('kpi-90-komersil').innerText = formatRp(sum90);
         }
 
         function filterAging(type, element) {
