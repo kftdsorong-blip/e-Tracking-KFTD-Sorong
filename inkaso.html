@@ -254,7 +254,7 @@
 
                 let matchAging = true;
                 if (activeAgingFilter === '30') {
-                    matchAging = (agingDays <= 30);
+                    matchAging = (agingDays > 30);
                 } else if (activeAgingFilter === '45') {
                     matchAging = (agingDays > 45);
                 } else if (activeAgingFilter === '90') {
