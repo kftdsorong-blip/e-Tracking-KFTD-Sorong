@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Tracking Inkaso & Pembayaran - Sorong</title>
+    <title>E-Tracking Inkaso & Pembayaran - Kimia Farma Trading & Distribution</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -20,12 +20,18 @@
 
     <!-- Header / Navbar -->
     <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> E-Tracking Inkaso & Pembayaran
-                </h1>
-                <p class="text-xs text-emerald-100">Monitoring Khusus Status Invoice, Pembayaran, Komersil, & TOP</p>
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Logo Kimia Farma Trading & Distribution -->
+                <div class="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Kimia_Farma.png" alt="Kimia Farma Logo" class="h-10 object-contain">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold flex items-center gap-2">
+                        E-Tracking Inkaso & Pembayaran
+                    </h1>
+                    <p class="text-xs text-emerald-100">Kimia Farma Trading & Distribution — Monitoring Status Invoice, Pembayaran, Komersil, & TOP</p>
+                </div>
             </div>
             
             <div class="flex items-center gap-3">
@@ -223,7 +229,6 @@
         function isInkasoAvailable(inkasoVal) {
             if (!inkasoVal) return false;
             let val = inkasoVal.trim().toUpperCase();
-            // Dianggap ADA jika tidak kosong dan tidak berisi tanda strip/kosong/belum
             return val !== '' && val !== '-' && val !== 'BELUM' && val !== 'BELUM ADA';
         }
 
@@ -236,7 +241,6 @@
             const listInkasoAda = inkasoData.filter(i => isInkasoAvailable(i.Inkaso));
             const listInkasoTidak = inkasoData.filter(i => !isInkasoAvailable(i.Inkaso));
 
-            // Count
             document.getElementById('kpi-total-faktur').innerText = listAll.length;
             document.getElementById('kpi-30-count').innerText = list30.length;
             document.getElementById('kpi-45-count').innerText = list45.length;
@@ -244,7 +248,6 @@
             document.getElementById('kpi-inkaso-ada-count').innerText = listInkasoAda.length;
             document.getElementById('kpi-inkaso-tidak-count').innerText = listInkasoTidak.length;
 
-            // Komersil
             const sumAll = listAll.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const sum30 = list30.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const sum45 = list45.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
