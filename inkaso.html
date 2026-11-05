@@ -115,10 +115,10 @@
                             <th class="p-3 text-center">Umur Faktur</th>
                             <th class="p-3">Tgl Balik Faktur [Kol O]</th>
                             <th class="p-3">Admin Logistik [Kol P]</th>
-                            <th class="p-3">Inkaso [Kol R]</th>
-                            <th class="p-3">Date Receive [Kol S]</th>
-                            <th class="p-3">Status Invoice [Kol T]</th>
-                            <th class="p-3 text-center">Status Payment [Kol U]</th>
+                            <th class="p-3">Inkaso [Kol Q]</th>
+                            <th class="p-3">Date Receive [Kol R]</th>
+                            <th class="p-3">Status Invoice [Kol S]</th>
+                            <th class="p-3 text-center">Status Payment [Kol T]</th>
                         </tr>
                     </thead>
                     <tbody id="inkaso-tbody" class="divide-y divide-slate-100">
@@ -167,7 +167,6 @@
             return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
         }
 
-        // Hitung umur faktur dari BillingDate sampai hari ini (dalam jumlah hari)
         function getAgingDays(billingDateStr) {
             if (!billingDateStr) return 0;
             let parts = billingDateStr.split('/');
@@ -185,7 +184,6 @@
             return 0;
         }
 
-        // Menghitung TOP 30 hari dari tanggal billing
         function calculateTOP(billingDateStr) {
             if (!billingDateStr) return '-';
             let parts = billingDateStr.split('/');
@@ -243,7 +241,6 @@
             let filtered = inkasoData.filter(item => {
                 const agingDays = getAgingDays(item.BillingDate);
 
-                // Filter berdasarkan KPI Card (Aging)
                 let matchAging = true;
                 if (activeAgingFilter === '30') {
                     matchAging = (agingDays <= 30);
