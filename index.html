@@ -122,13 +122,17 @@
                                 <input type="date" id="form-tgl-terima" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Foto SP/Dok [Kol M]</label>
-                                <input type="file" id="form-sp" accept="image/*" capture="environment" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Surat Pesanan [Kol M]</label>
+                                <select id="form-sp-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
+                                    <option value="ADA">ADA</option>
+                                    <option value="BELUM ADA">BELUM ADA</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Dok [Kol N]</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pengiriman [Kol N]</label>
                                 <select id="form-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
-                                    <option value="SUDH DIKIRM (DONE)">DONE (Selesai)</option>
+                                    <option value="SUDH DIKIRM (DONE)">SUDH DIKIRM (DONE)</option>
+                                    <option value="INTRANSIT">INTRANSIT</option>
                                     <option value="BELUM DIKIRIM">BELUM DIKIRIM</option>
                                 </select>
                             </div>
@@ -166,7 +170,7 @@
             </div>
 
             <div onclick="filterKPI('ADA SP')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ada Foto SP</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ada Surat Pesanan</p>
                 <h3 class="text-xl font-extrabold text-indigo-600 mt-1" id="kpi-sp-ada">0</h3>
                 <span class="text-[11px] text-indigo-700 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded">Dokumen OK</span>
             </div>
@@ -175,27 +179,6 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanpa SP</p>
                 <h3 class="text-xl font-extrabold text-rose-600 mt-1" id="kpi-sp-tidak">0</h3>
                 <span class="text-[11px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Perlu Cek</span>
-            </div>
-        </section>
-
-        <!-- Charts Section -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-column text-blue-600"></i> Nominal Komersil per Salesman
-                </h3>
-                <div class="h-64 relative">
-                    <canvas id="chart-salesman"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-pie text-indigo-600"></i> Distribusi Barang & Ekspedisi
-                </h3>
-                <div class="h-64 relative flex justify-center">
-                    <canvas id="chart-expedisi"></canvas>
-                </div>
             </div>
         </section>
 
@@ -235,8 +218,8 @@
                             <th class="p-3">Barang</th>
                             <th class="p-3">Tgl Kirim (Kol K)</th>
                             <th class="p-3">Date Receive (Kol L)</th>
-                            <th class="p-3 text-center">Fisik SP/Foto (Kol M)</th>
-                            <th class="p-3 text-center">Status Dok (Kol N)</th>
+                            <th class="p-3 text-center">Surat Pesanan (Kol M)</th>
+                            <th class="p-3 text-center">Status Pengiriman (Kol N)</th>
                         </tr>
                     </thead>
                     <tbody id="invoice-tbody" class="divide-y divide-slate-100">
@@ -396,7 +379,10 @@
                 document.getElementById('form-komersil').value = formatRp(item.Komersil);
                 document.getElementById('form-tgl-kirim').value = item.TglKirim ? formatDateForInput(item.TglKirim) : '';
                 document.getElementById('form-tgl-terima').value = item.DateReceive ? formatDateForInput(item.DateReceive) : '';
-                document.getElementById('form-status').value = (item.Dokumentasi === 'DONE' || item.Dokumentasi.includes('DONE')) ? 'SUDH DIKIRM (DONE)' : 'BELUM DIKIRIM';
+                
+                document.getElementById('form-sp-status').value = (item.SP === 'ADA' || item.SP.includes('ADA')) ? 'ADA' : 'BELUM ADA';
+                document.getElementById('form-status').value = item.Dokumentasi ? item.Dokumentasi : 'BELUM DIKIRIM';
+                
                 document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
             } else {
                 document.getElementById('form-message').innerText = 'Faktur tidak ditemukan.';
@@ -418,71 +404,19 @@
             if (index !== -1) {
                 const tglKirim = document.getElementById('form-tgl-kirim').value;
                 const tglTerima = document.getElementById('form-tgl-terima').value;
-                let statusDok = document.getElementById('form-status').value;
-                const fileInput = document.getElementById('form-sp');
-                
-                if (fileInput.files && fileInput.files[0]) {
-                    statusDok = 'SUDH DIKIRM (DONE)';
-                    document.getElementById('form-status').value = 'SUDH DIKIRM (DONE)';
-                }
+                const spStatus = document.getElementById('form-sp-status').value;
+                const statusDok = document.getElementById('form-status').value;
                 
                 document.getElementById('btn-submit').disabled = true;
-                document.getElementById('form-message').innerText = '⏳ Mengompres & memproses foto...';
+                document.getElementById('form-message').innerText = '⏳ Menyimpan ke Spreadsheet...';
 
-                if (fileInput.files && fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(uploadEvent) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 800;
-                            const MAX_HEIGHT = 800;
-                            let width = img.width;
-                            let height = img.height;
-
-                            if (width > height) {
-                                if (width > MAX_WIDTH) {
-                                    height *= MAX_WIDTH / width;
-                                    width = MAX_WIDTH;
-                                }
-                            } else {
-                                if (height > MAX_HEIGHT) {
-                                    width *= MAX_HEIGHT / height;
-                                    height = MAX_HEIGHT;
-                                }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                            const base64Content = dataUrl.split(',')[1];
-
-                            sendDataToBackend({
-                                NoBilling: noBilling,
-                                TglKirim: tglKirim,
-                                DateReceive: tglTerima,
-                                Dokumentasi: statusDok,
-                                fileName: file.name,
-                                mimeType: 'image/jpeg',
-                                fileData: base64Content
-                            });
-                        };
-                        img.src = uploadEvent.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    sendDataToBackend({
-                        NoBilling: noBilling,
-                        TglKirim: tglKirim,
-                        DateReceive: tglTerima,
-                        Dokumentasi: statusDok
-                    });
-                }
+                sendDataToBackend({
+                    NoBilling: noBilling,
+                    TglKirim: tglKirim,
+                    DateReceive: tglTerima,
+                    SPStatus: spStatus,
+                    Dokumentasi: statusDok
+                });
             } else {
                 alert('Pilih atau masukkan No. Billing terlebih dahulu!');
             }
@@ -494,7 +428,7 @@
                 mode: "no-cors",
                 body: JSON.stringify(payload)
             }).then(() => {
-                document.getElementById('form-message').innerText = '✅ Berhasil tersimpan ke Drive & Spreadsheet!';
+                document.getElementById('form-message').innerText = '✅ Berhasil tersimpan ke Spreadsheet!';
                 document.getElementById('btn-submit').disabled = false;
                 setTimeout(() => loadDataFromSheets(), 1500);
             }).catch(error => {
@@ -506,10 +440,10 @@
 
         function updateKPIs() {
             const totalKomersil = invoiceData.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
-            const doneCount = invoiceData.filter(i => i.Dokumentasi === 'DONE').length;
-            const pendingCount = invoiceData.filter(i => i.Dokumentasi !== 'DONE').length;
-            const adaSP = invoiceData.filter(i => i.SP && i.SP.startsWith('http')).length;
-            const tidakSP = invoiceData.filter(i => !i.SP || !i.SP.startsWith('http')).length;
+            const doneCount = invoiceData.filter(i => i.Dokumentasi === 'SUDH DIKIRM (DONE)').length;
+            const pendingCount = invoiceData.filter(i => i.Dokumentasi !== 'SUDH DIKIRM (DONE)').length;
+            const adaSP = invoiceData.filter(i => i.SP === 'ADA').length;
+            const tidakSP = invoiceData.filter(i => i.SP !== 'ADA').length;
 
             document.getElementById('kpi-total-komersil').innerText = formatRp(totalKomersil);
             document.getElementById('kpi-done-count').innerText = doneCount;
@@ -547,10 +481,10 @@
                                       item.Salesman.toLowerCase().includes(search);
                 
                 let matchesKPI = true;
-                if (activeFilter === 'DONE') matchesKPI = (item.Dokumentasi === 'DONE');
-                else if (activeFilter === 'PENDING') matchesKPI = (item.Dokumentasi !== 'DONE');
-                else if (activeFilter === 'ADA SP') matchesKPI = (item.SP && item.SP.startsWith('http'));
-                else if (activeFilter === 'TIDAK ADA SP') matchesKPI = (!item.SP || !item.SP.startsWith('http'));
+                if (activeFilter === 'DONE') matchesKPI = (item.Dokumentasi === 'SUDH DIKIRM (DONE)');
+                else if (activeFilter === 'PENDING') matchesKPI = (item.Dokumentasi !== 'SUDH DIKIRM (DONE)');
+                else if (activeFilter === 'ADA SP') matchesKPI = (item.SP === 'ADA');
+                else if (activeFilter === 'TIDAK ADA SP') matchesKPI = (item.SP !== 'ADA');
 
                 let matchesDate = true;
                 if (selectedDate && item.BillingDate) {
@@ -577,13 +511,6 @@
             });
 
             tbody.innerHTML = filtered.map(item => {
-                let spDisplay = '-';
-                if (item.SP && item.SP.startsWith('http')) {
-                    spDisplay = `<a href="${item.SP}" target="_blank" class="text-blue-600 underline font-semibold"><i class="fa-solid fa-image mr-1"></i> Buka Foto</a>`;
-                } else if (item.SP) {
-                    spDisplay = item.SP;
-                }
-
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-3 font-mono font-bold text-blue-600">#${item.NoBilling}</td>
@@ -595,8 +522,8 @@
                         <td class="p-3 text-slate-600">${item.Barang}</td>
                         <td class="p-3 text-slate-500">${item.TglKirim || '-'}</td>
                         <td class="p-3 text-slate-500">${item.DateReceive || '-'}</td>
-                        <td class="p-3 text-center">${spDisplay}</td>
-                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${item.Dokumentasi}</span></td>
+                        <td class="p-3 text-center font-semibold ${item.SP === 'ADA' ? 'text-indigo-600' : 'text-slate-400'}">${item.SP || 'BELUM ADA'}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'SUDH DIKIRM (DONE)' ? 'bg-emerald-100 text-emerald-700' : item.Dokumentasi === 'INTRANSIT' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">${item.Dokumentasi || 'BELUM DIKIRIM'}</span></td>
                     </tr>
                 `;
             }).join('');
