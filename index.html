@@ -182,6 +182,27 @@
             </div>
         </section>
 
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-blue-600"></i> Nominal Komersil per Salesman
+                </h3>
+                <div class="h-64 relative">
+                    <canvas id="chart-salesman"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-indigo-600"></i> Distribusi Barang & Ekspedisi
+                </h3>
+                <div class="h-64 relative flex justify-center">
+                    <canvas id="chart-expedisi"></canvas>
+                </div>
+            </div>
+        </section>
+
         <!-- Master Data Table Section -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
@@ -380,7 +401,7 @@
                 document.getElementById('form-tgl-kirim').value = item.TglKirim ? formatDateForInput(item.TglKirim) : '';
                 document.getElementById('form-tgl-terima').value = item.DateReceive ? formatDateForInput(item.DateReceive) : '';
                 
-                document.getElementById('form-sp-status').value = (item.SP === 'ADA' || item.SP.includes('ADA')) ? 'ADA' : 'BELUM ADA';
+                document.getElementById('form-sp-status').value = (item.SP === 'ADA') ? 'ADA' : 'BELUM ADA';
                 document.getElementById('form-status').value = item.Dokumentasi ? item.Dokumentasi : 'BELUM DIKIRIM';
                 
                 document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
