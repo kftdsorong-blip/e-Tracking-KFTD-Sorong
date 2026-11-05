@@ -18,6 +18,235 @@
                 <h1 class="text-2xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-file-invoice-dollar"></i> E-Tracking Inkaso & Pembayaran
                 </h1>
+                <p class="text-xs text-emerald-100">Monitoring Khusus Status Invoice, Pembayaran, Komersil, & TOP</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="loadInkasoData()" id="btn-sync" class="bg-emerald-800 hover:bg-emerald-900 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 border border-emerald-500 transition-all">
+                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Sinkronkan Data Inkaso
+                </button>
+                <div class="bg-emerald-800/80 px-3 py-2 rounded-lg text-xs border border-emerald-600">
+                    <span id="sync-time" class="text-emerald-200">Terakhir: Real-time</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- KPI / Summary Cards Inkaso -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Faktur Dipantau</p>
+                <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-faktur">0</h3>
+                <span class="text-[11px] text-emerald-600 font-medium">Data Inkaso Aktif</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Faktur Selesai / Terima</p>
+                <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="kpi-terima-count">0</h3>
+                <span class="text-[11px] text-slate-500">Logistik / Balik Faktur OK</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status Payment Pending</p>
+                <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-pending-count">0</h3>
+                <span class="text-[11px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Belum Lunas</span>
+            </div>
+        </section>
+
+        <!-- Master Data Inkaso Table Section -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-emerald-600"></i> Tabel Monitoring Inkaso & Pembayaran
+                    </h3>
+                    <p class="text-xs text-slate-500" id="active-filter-label">Memuat data dari Google Spreadsheet...</p>
+                </div>
+                
+                <!-- Filter Section -->
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                    <!-- Filter No Billing -->
+                    <input type="text" id="filter-billing" oninput="renderInkasoTable()" placeholder="Cari No. Billing..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-36">
+                    
+                    <!-- Filter Admin Logistik -->
+                    <input type="text" id="filter-admin" oninput="renderInkasoTable()" placeholder="Cari Admin Logistik..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-36">
+                    
+                    <!-- Filter Status Invoice -->
+                    <select id="filter-status-invoice" onchange="renderInkasoTable()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+                        <option value="">Semua Status Invoice</option>
+                        <option value="BELUM TITIP FAKTUR">BELUM TITIP FAKTUR</option>
+                        <option value="SUDAH">SUDAH</option>
+                    </select>
+
+                    <button onclick="resetAllFilters()" class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700">Reset</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <th class="p-3">No. Billing</th>
+                            <th class="p-3">Tgl Billing</th>
+                            <th class="p-3">Ship to Party (Outlet)</th>
+                            <th class="p-3 text-right">Komersil (Rp)</th>
+                            <th class="p-3 text-right">PPn (Rp)</th>
+                            <th class="p-3">TOP (30 Hari)</th>
+                            <th class="p-3">Tgl Balik Faktur [Kol O]</th>
+                            <th class="p-3">Admin Logistik [Kol P]</th>
+                            <th class="p-3">Inkaso [Kol R]</th>
+                            <th class="p-3">Date Receive [Kol S]</th>
+                            <th class="p-3">Status Invoice [Kol T]</th>
+                            <th class="p-3 text-center">Status Payment [Kol U]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inkaso-tbody" class="divide-y divide-slate-100">
+                        <!-- Rows rendered dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- App Script khusus Inkaso -->
+    <script>
+        let inkasoData = [];
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInkasoData();
+        });
+
+        function loadInkasoData() {
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+            
+            fetch(WEB_APP_URL)
+                .then(response => response.json())
+                .then(data => {
+                    inkasoData = data;
+                    icon.classList.remove('fa-spin');
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    document.getElementById('sync-time').innerText = `Terakhir: ${timeStr} WIT`;
+                    
+                    updateKPIs();
+                    renderInkasoTable();
+                })
+                .catch(error => {
+                    console.error("Gagal memuat data:", error);
+                    icon.classList.remove('fa-spin');
+                    alert('Gagal mengambil data dari Google Spreadsheet.');
+                });
+        }
+
+        function formatRp(amount) {
+            return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+        }
+
+        // Menghitung TOP 30 hari dari tanggal billing
+        function calculateTOP(billingDateStr) {
+            if (!billingDateStr) return '-';
+            let parts = billingDateStr.split('/');
+            if (parts.length === 3) {
+                let day = parseInt(parts[0], 10);
+                let month = parseInt(parts[1], 10) - 1;
+                let year = parseInt(parts[2], 10);
+                let dateObj = new Date(year, month, day);
+                if (isNaN(dateObj.getTime())) return '-';
+                
+                // Tambah 30 hari
+                dateObj.setDate(dateObj.getDate() + 30);
+                let d = String(dateObj.getDate()).padStart(2, '0');
+                let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                let y = dateObj.getFullYear();
+                return `${d}/${m}/${y}`;
+            }
+            return '-';
+        }
+
+        function updateKPIs() {
+            const totalFaktur = inkasoData.length;
+            const terimaCount = inkasoData.filter(i => i.AdminLogistik && i.AdminLogistik.includes('TERIMA')).length;
+            const pendingCount = inkasoData.filter(i => !i.StatusPayment || i.StatusPayment.toLowerCase().includes('pending') || i.StatusPayment === '').length;
+
+            document.getElementById('kpi-total-faktur').innerText = totalFaktur;
+            document.getElementById('kpi-terima-count').innerText = terimaCount;
+            document.getElementById('kpi-pending-count').innerText = pendingCount;
+        }
+
+        function resetAllFilters() {
+            document.getElementById('filter-billing').value = '';
+            document.getElementById('filter-admin').value = '';
+            document.getElementById('filter-status-invoice').value = '';
+            renderInkasoTable();
+        }
+
+        function renderInkasoTable() {
+            const tbody = document.getElementById('inkaso-tbody');
+            const filterBilling = document.getElementById('filter-billing').value.toLowerCase();
+            const filterAdmin = document.getElementById('filter-admin').value.toLowerCase();
+            const filterStatusInv = document.getElementById('filter-status-invoice').value.toUpperCase();
+
+            let filtered = inkasoData.filter(item => {
+                const matchBilling = !filterBilling || (item.NoBilling && item.NoBilling.toLowerCase().includes(filterBilling));
+                const matchAdmin = !filterAdmin || (item.AdminLogistik && item.AdminLogistik.toLowerCase().includes(filterAdmin));
+                const matchStatusInv = !filterStatusInv || (item.StatusInvoice && item.StatusInvoice.toUpperCase().includes(filterStatusInv));
+                return matchBilling && matchAdmin && matchStatusInv;
+            });
+
+            tbody.innerHTML = filtered.map(item => {
+                let topDate = calculateTOP(item.BillingDate);
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-emerald-600">#${item.NoBilling}</td>
+                        <td class="p-3 text-slate-500">${item.BillingDate || '-'}</td>
+                        <td class="p-3 font-semibold text-slate-800">${item.ShipTo}</td>
+                        <td class="p-3 text-right font-bold text-slate-800">${formatRp(item.Komersil)}</td>
+                        <td class="p-3 text-right text-slate-600">${formatRp(item.PPn)}</td>
+                        <td class="p-3 text-slate-600 font-medium text-amber-700">${topDate}</td>
+                        <td class="p-3 text-slate-600">${item.TglBalikFaktur || '-'}</td>
+                        <td class="p-3 text-slate-600 font-medium">${item.AdminLogistik || '-'}</td>
+                        <td class="p-3 text-slate-600">${item.Inkaso || '-'}</td>
+                        <td class="p-3 text-slate-600">${item.DateReceive2 || '-'}</td>
+                        <td class="p-3 text-slate-600 font-semibold">${item.StatusInvoice || '-'}</td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.StatusPayment ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}">
+                                ${item.StatusPayment || 'PENDING'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('active-filter-label').innerText = `Menampilkan ${filtered.length} dari ${inkasoData.length} Data Inkaso`;
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Tracking Inkaso & Pembayaran - Sorong</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <!-- Header / Navbar -->
+    <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> E-Tracking Inkaso & Pembayaran
+                </h1>
                 <p class="text-xs text-emerald-100">Monitoring Khusus Status Invoice, Pembayaran, & Balik Faktur [Kolom O - U]</p>
             </div>
             
