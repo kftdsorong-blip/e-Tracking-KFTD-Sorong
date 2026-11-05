@@ -42,18 +42,18 @@
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- KPI / Summary Cards Interactive Filter (Jatuh Tempo & Total Komersil) -->
-        <section class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <!-- KPI / Summary Cards Interactive Filter -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
             <!-- Card All -->
-            <div onclick="filterAging('ALL', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all active-kpi">
+            <div onclick="filterKPI('ALL', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all active-kpi">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Semua Faktur</p>
                 <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-faktur">0</h3>
                 <p class="text-xs font-bold text-emerald-700 mt-0.5" id="kpi-total-komersil">Rp 0</p>
-                <span class="text-[10px] text-emerald-600 font-medium">Klik untuk tampilkan semua</span>
+                <span class="text-[10px] text-emerald-600 font-medium">Tampilkan Semua</span>
             </div>
 
             <!-- Card TOP 30 Hari -->
-            <div onclick="filterAging('30', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
+            <div onclick="filterKPI('30', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&lt;= 30 Hari)</p>
                 <h3 class="text-xl font-extrabold text-blue-600 mt-1" id="kpi-30-count">0</h3>
                 <p class="text-xs font-bold text-blue-700 mt-0.5" id="kpi-30-komersil">Rp 0</p>
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Card > 45 Hari -->
-            <div onclick="filterAging('45', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
+            <div onclick="filterKPI('45', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 45 Hari)</p>
                 <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-45-count">0</h3>
                 <p class="text-xs font-bold text-amber-700 mt-0.5" id="kpi-45-komersil">Rp 0</p>
@@ -69,11 +69,27 @@
             </div>
 
             <!-- Card > 90 Hari -->
-            <div onclick="filterAging('90', this)" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-rose-400 transition-all">
+            <div onclick="filterKPI('90', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-rose-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 90 Hari)</p>
                 <h3 class="text-xl font-extrabold text-rose-600 mt-1" id="kpi-90-count">0</h3>
                 <p class="text-xs font-bold text-rose-700 mt-0.5" id="kpi-90-komersil">Rp 0</p>
-                <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Kritis / Overdue</span>
+                <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Kritis</span>
+            </div>
+
+            <!-- Card Inkaso Ada -->
+            <div onclick="filterKPI('INKASO_ADA', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inkaso [Kol Q] (Ada Berkas)</p>
+                <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="kpi-inkaso-ada-count">0</h3>
+                <p class="text-xs font-bold text-emerald-700 mt-0.5" id="kpi-inkaso-ada-komersil">Rp 0</p>
+                <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Berkas Ada</span>
+            </div>
+
+            <!-- Card Inkaso Tidak Ada -->
+            <div onclick="filterKPI('INKASO_TIDAK', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-purple-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inkaso [Kol Q] (Tidak Ada)</p>
+                <h3 class="text-xl font-extrabold text-purple-600 mt-1" id="kpi-inkaso-tidak-count">0</h3>
+                <p class="text-xs font-bold text-purple-700 mt-0.5" id="kpi-inkaso-tidak-komersil">Rp 0</p>
+                <span class="text-[10px] text-purple-700 font-semibold bg-purple-50 px-1.5 py-0.5 rounded">Belum Ada</span>
             </div>
         </section>
 
@@ -134,7 +150,7 @@
     <!-- App Script khusus Inkaso -->
     <script>
         let inkasoData = [];
-        let activeAgingFilter = 'ALL';
+        let activeFilterType = 'ALL';
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -204,39 +220,55 @@
             return '-';
         }
 
+        function isInkasoAvailable(inkasoVal) {
+            if (!inkasoVal) return false;
+            let val = inkasoVal.trim().toUpperCase();
+            // Dianggap ADA jika tidak kosong dan tidak berisi tanda strip/kosong/belum
+            return val !== '' && val !== '-' && val !== 'BELUM' && val !== 'BELUM ADA';
+        }
+
         function updateKPIs() {
             const listAll = inkasoData;
             const list30 = inkasoData.filter(i => getAgingDays(i.BillingDate) <= 30);
             const list45 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 45 && getAgingDays(i.BillingDate) <= 90);
             const list90 = inkasoData.filter(i => getAgingDays(i.BillingDate) > 90);
+            
+            const listInkasoAda = inkasoData.filter(i => isInkasoAvailable(i.Inkaso));
+            const listInkasoTidak = inkasoData.filter(i => !isInkasoAvailable(i.Inkaso));
 
-            // Hitung total jumlah faktur
+            // Count
             document.getElementById('kpi-total-faktur').innerText = listAll.length;
             document.getElementById('kpi-30-count').innerText = list30.length;
             document.getElementById('kpi-45-count').innerText = list45.length;
             document.getElementById('kpi-90-count').innerText = list90.length;
+            document.getElementById('kpi-inkaso-ada-count').innerText = listInkasoAda.length;
+            document.getElementById('kpi-inkaso-tidak-count').innerText = listInkasoTidak.length;
 
-            // Hitung total nilai komersil
+            // Komersil
             const sumAll = listAll.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const sum30 = list30.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const sum45 = list45.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
             const sum90 = list90.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+            const sumInkasoAda = listInkasoAda.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
+            const sumInkasoTidak = listInkasoTidak.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
 
             document.getElementById('kpi-total-komersil').innerText = formatRp(sumAll);
             document.getElementById('kpi-30-komersil').innerText = formatRp(sum30);
             document.getElementById('kpi-45-komersil').innerText = formatRp(sum45);
             document.getElementById('kpi-90-komersil').innerText = formatRp(sum90);
+            document.getElementById('kpi-inkaso-ada-komersil').innerText = formatRp(sumInkasoAda);
+            document.getElementById('kpi-inkaso-tidak-komersil').innerText = formatRp(sumInkasoTidak);
         }
 
-        function filterAging(type, element) {
-            activeAgingFilter = type;
+        function filterKPI(type, element) {
+            activeFilterType = type;
             document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active-kpi'));
             element.classList.add('active-kpi');
             renderInkasoTable();
         }
 
         function resetAllFilters() {
-            activeAgingFilter = 'ALL';
+            activeFilterType = 'ALL';
             document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active-kpi'));
             document.querySelectorAll('.kpi-card')[0].classList.add('active-kpi');
             document.getElementById('filter-billing').value = '';
@@ -251,20 +283,25 @@
 
             let filtered = inkasoData.filter(item => {
                 const agingDays = getAgingDays(item.BillingDate);
+                const hasInkaso = isInkasoAvailable(item.Inkaso);
 
-                let matchAging = true;
-                if (activeAgingFilter === '30') {
-                    matchAging = (agingDays > 30);
-                } else if (activeAgingFilter === '45') {
-                    matchAging = (agingDays > 45);
-                } else if (activeAgingFilter === '90') {
-                    matchAging = (agingDays > 90);
+                let matchFilter = true;
+                if (activeFilterType === '30') {
+                    matchFilter = (agingDays <= 30);
+                } else if (activeFilterType === '45') {
+                    matchFilter = (agingDays > 45);
+                } else if (activeFilterType === '90') {
+                    matchFilter = (agingDays > 90);
+                } else if (activeFilterType === 'INKASO_ADA') {
+                    matchFilter = hasInkaso;
+                } else if (activeFilterType === 'INKASO_TIDAK') {
+                    matchFilter = !hasInkaso;
                 }
 
                 const matchBilling = !filterBilling || (item.NoBilling && item.NoBilling.toLowerCase().includes(filterBilling));
                 const matchStatusInv = !filterStatusInv || (item.StatusInvoice && item.StatusInvoice.toUpperCase().includes(filterStatusInv));
 
-                return matchAging && matchBilling && matchStatusInv;
+                return matchFilter && matchBilling && matchStatusInv;
             });
 
             tbody.innerHTML = filtered.map(item => {
@@ -275,6 +312,10 @@
                 if (days > 90) badgeAgingClass = 'bg-rose-100 text-rose-700 font-bold';
                 else if (days > 45) badgeAgingClass = 'bg-amber-100 text-amber-700 font-bold';
                 else if (days <= 30) badgeAgingClass = 'bg-blue-100 text-blue-700';
+
+                let inkasoBadge = isInkasoAvailable(item.Inkaso) 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-bold">${item.Inkaso}</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 text-slate-500">${item.Inkaso || '-'}</span>`;
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -291,7 +332,7 @@
                         </td>
                         <td class="p-3 text-slate-600">${item.TglBalikFaktur || '-'}</td>
                         <td class="p-3 text-slate-600 font-medium">${item.AdminLogistik || '-'}</td>
-                        <td class="p-3 text-slate-600">${item.Inkaso || '-'}</td>
+                        <td class="p-3 text-slate-600">${inkasoBadge}</td>
                         <td class="p-3 text-slate-600">${item.DateReceive2 || '-'}</td>
                         <td class="p-3 text-slate-600 font-semibold">${item.StatusInvoice || '-'}</td>
                         <td class="p-3 text-center">
