@@ -26,7 +26,6 @@
     <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <!-- Logo Kimia Farma Trading & Distribution -->
                 <div class="bg-white px-3 py-1.5 rounded-lg shadow-sm flex items-center justify-center">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Kimia_Farma_logo.svg" 
                          alt="Kimia Farma Logo" 
@@ -75,7 +74,6 @@
                             </button>
                         </div>
 
-                        <!-- Area Kamera HP (Sensitivitas Tinggi) -->
                         <div id="reader-container" class="hidden mb-3 bg-black rounded-lg overflow-hidden border border-slate-700 relative">
                             <div id="interactive-reader" class="w-full"></div>
                             <button type="button" onclick="stopCameraScanner()" class="absolute top-2 right-2 bg-rose-600 text-white px-2.5 py-1 rounded text-[10px] font-bold z-20 shadow">Tutup Kamera</button>
@@ -92,9 +90,7 @@
                     
                     <div class="my-3 border-t border-slate-800 pt-3">
                         <p class="text-xs text-slate-400 mb-2">Pilih Cepat No. Billing:</p>
-                        <div class="flex flex-wrap gap-1.5" id="billing-pills">
-                            <!-- Pills loaded dynamically -->
-                        </div>
+                        <div class="flex flex-wrap gap-1.5" id="billing-pills"></div>
                     </div>
 
                     <div class="text-xs text-slate-400 flex items-center justify-between">
@@ -131,18 +127,18 @@
                                 <input type="date" id="form-tgl-terima" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Surat Pesanan [Kol M]</label>
-                                <select id="form-sp-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
-                                    <option value="ADA">ADA</option>
-                                    <option value="BELUM ADA">BELUM ADA</option>
-                                </select>
-                            </div>
-                            <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pengiriman [Kol N]</label>
                                 <select id="form-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
                                     <option value="SUDH DIKIRM (DONE)">SUDH DIKIRM (DONE)</option>
                                     <option value="INTRANSIT">INTRANSIT</option>
                                     <option value="BELUM DIKIRIM">BELUM DIKIRIM</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Surat Pesanan [Kol P]</label>
+                                <select id="form-sp-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
+                                    <option value="ADA">ADA</option>
+                                    <option value="TIDAK ADA">TIDAK ADA</option>
                                 </select>
                             </div>
                         </div>
@@ -223,7 +219,6 @@
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <!-- Filter Tanggal Billing (Kolom B) -->
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-xs">
                         <span class="text-slate-500 font-medium">Tgl Billing:</span>
                         <input type="date" id="filter-date" onchange="renderTable()" class="bg-transparent focus:outline-none text-slate-700">
@@ -248,8 +243,8 @@
                             <th class="p-3">Barang</th>
                             <th class="p-3">Tgl Kirim (Kol K)</th>
                             <th class="p-3">Date Receive (Kol L)</th>
-                            <th class="p-3 text-center">Status SP (Ada / Tidak Ada)</th>
                             <th class="p-3 text-center">Status Pengiriman (Kol N)</th>
+                            <th class="p-3 text-center">Surat Pesanan (Kol P)</th>
                         </tr>
                     </thead>
                     <tbody id="invoice-tbody" class="divide-y divide-slate-100">
@@ -304,7 +299,6 @@
                 });
         }
 
-        // Fungsi Kamera HP Scanner (Sensitivitas Tinggi)
         function toggleCameraScanner() {
             const container = document.getElementById('reader-container');
             const btnCam = document.getElementById('btn-toggle-cam');
@@ -316,11 +310,7 @@
                 
                 html5QrCode = new Html5Qrcode("interactive-reader");
                 
-                const qrConfig = {
-                    fps: 15,
-                    qrbox: { width: 300, height: 120 },
-                    aspectRatio: 1.777778
-                };
+                const qrConfig = { fps: 15, qrbox: { width: 300, height: 120 }, aspectRatio: 1.777778 };
 
                 html5QrCode.start(
                     { facingMode: "environment" },
@@ -334,7 +324,7 @@
                     (errorMessage) => {}
                 ).catch(err => {
                     console.error("Gagal membuka kamera:", err);
-                    alert("Gagal mengakses kamera. Pastikan izin kamera pada browser telah diaktifkan.");
+                    alert("Gagal mengakses kamera.");
                     stopCameraScanner();
                 });
 
@@ -354,16 +344,12 @@
                     btnCam.innerHTML = `<i class="fa-solid fa-camera"></i> Buka Kamera HP`;
                     btnCam.classList.replace('bg-rose-600', 'bg-blue-600');
                 }).catch(err => {
-                    console.error("Gagal menutup kamera:", err);
                     isCameraActive = false;
                     document.getElementById('reader-container').classList.add('hidden');
                 });
             } else {
                 isCameraActive = false;
                 document.getElementById('reader-container').classList.add('hidden');
-                const btnCam = document.getElementById('btn-toggle-cam');
-                btnCam.innerHTML = `<i class="fa-solid fa-camera"></i> Buka Kamera HP`;
-                btnCam.classList.replace('bg-rose-600', 'bg-blue-600');
             }
         }
 
@@ -410,8 +396,8 @@
                 document.getElementById('form-tgl-kirim').value = item.TglKirim ? formatDateForInput(item.TglKirim) : '';
                 document.getElementById('form-tgl-terima').value = item.DateReceive ? formatDateForInput(item.DateReceive) : '';
                 
-                document.getElementById('form-sp-status').value = (item.SP === 'ADA') ? 'ADA' : 'BELUM ADA';
-                document.getElementById('form-status').value = item.Dokumentasi ? item.Dokumentasi : 'BELUM DIKIRIM';
+                document.getElementById('form-status').value = item.StatusPengirimanN ? item.StatusPengirimanN : 'BELUM DIKIRIM';
+                document.getElementById('form-sp-status').value = (item.SuratPesananP && item.SuratPesananP.toUpperCase() === 'ADA') ? 'ADA' : 'TIDAK ADA';
                 
                 document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
             } else {
@@ -434,8 +420,8 @@
             if (index !== -1) {
                 const tglKirim = document.getElementById('form-tgl-kirim').value;
                 const tglTerima = document.getElementById('form-tgl-terima').value;
-                const spStatus = document.getElementById('form-sp-status').value;
                 const statusDok = document.getElementById('form-status').value;
+                const spStatus = document.getElementById('form-sp-status').value;
                 
                 document.getElementById('btn-submit').disabled = true;
                 document.getElementById('form-message').innerText = '⏳ Menyimpan ke Spreadsheet...';
@@ -444,8 +430,8 @@
                     NoBilling: noBilling,
                     TglKirim: tglKirim,
                     DateReceive: tglTerima,
-                    SPStatus: spStatus,
-                    Dokumentasi: statusDok
+                    StatusPengirimanN: statusDok,
+                    SuratPesananP: spStatus
                 });
             } else {
                 alert('Pilih atau masukkan No. Billing terlebih dahulu!');
@@ -468,12 +454,18 @@
             });
         }
 
+        function isSpAvailable(spVal) {
+            if (!spVal) return false;
+            let val = spVal.trim().toUpperCase();
+            return val === 'ADA' || val === 'ADA SP' || val.includes('ADA');
+        }
+
         function updateKPIs() {
             const totalKomersil = invoiceData.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
-            const doneCount = invoiceData.filter(i => i.Dokumentasi === 'SUDH DIKIRM (DONE)').length;
-            const pendingCount = invoiceData.filter(i => i.Dokumentasi !== 'SUDH DIKIRM (DONE)').length;
-            const adaSP = invoiceData.filter(i => i.SP === 'ADA').length;
-            const tidakSP = invoiceData.filter(i => i.SP !== 'ADA').length;
+            const doneCount = invoiceData.filter(i => i.StatusPengirimanN === 'SUDH DIKIRM (DONE)').length;
+            const pendingCount = invoiceData.filter(i => i.StatusPengirimanN !== 'SUDH DIKIRM (DONE)').length;
+            const adaSP = invoiceData.filter(i => isSpAvailable(i.SuratPesananP)).length;
+            const tidakSP = invoiceData.filter(i => !isSpAvailable(i.SuratPesananP)).length;
 
             document.getElementById('kpi-total-komersil').innerText = formatRp(totalKomersil);
             document.getElementById('kpi-done-count').innerText = doneCount;
@@ -510,11 +502,13 @@
                                       item.NoBilling.includes(search) || 
                                       item.Salesman.toLowerCase().includes(search);
                 
+                const hasSP = isSpAvailable(item.SuratPesananP);
+
                 let matchesKPI = true;
-                if (activeFilter === 'DONE') matchesKPI = (item.Dokumentasi === 'SUDH DIKIRM (DONE)');
-                else if (activeFilter === 'PENDING') matchesKPI = (item.Dokumentasi !== 'SUDH DIKIRM (DONE)');
-                else if (activeFilter === 'ADA SP') matchesKPI = (item.SP === 'ADA');
-                else if (activeFilter === 'TIDAK ADA SP') matchesKPI = (item.SP !== 'ADA');
+                if (activeFilter === 'DONE') matchesKPI = (item.StatusPengirimanN === 'SUDH DIKIRM (DONE)');
+                else if (activeFilter === 'PENDING') matchesKPI = (item.StatusPengirimanN !== 'SUDH DIKIRM (DONE)');
+                else if (activeFilter === 'ADA SP') matchesKPI = hasSP;
+                else if (activeFilter === 'TIDAK ADA SP') matchesKPI = !hasSP;
 
                 let matchesDate = true;
                 if (selectedDate && item.BillingDate) {
@@ -541,6 +535,7 @@
             });
 
             tbody.innerHTML = filtered.map(item => {
+                const hasSP = isSpAvailable(item.SuratPesananP);
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-3 font-mono font-bold text-blue-600">#${item.NoBilling}</td>
@@ -552,8 +547,8 @@
                         <td class="p-3 text-slate-600">${item.Barang}</td>
                         <td class="p-3 text-slate-500">${item.TglKirim || '-'}</td>
                         <td class="p-3 text-slate-500">${item.DateReceive || '-'}</td>
-                        <td class="p-3 text-center font-semibold ${item.SP === 'ADA' ? 'text-indigo-600' : 'text-slate-400'}">${item.SP || 'BELUM ADA'}</td>
-                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'SUDH DIKIRM (DONE)' ? 'bg-emerald-100 text-emerald-700' : item.Dokumentasi === 'INTRANSIT' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">${item.Dokumentasi || 'BELUM DIKIRIM'}</span></td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.StatusPengirimanN === 'SUDH DIKIRM (DONE)' ? 'bg-emerald-100 text-emerald-700' : item.StatusPengirimanN === 'INTRANSIT' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">${item.StatusPengirimanN || 'BELUM DIKIRIM'}</span></td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${hasSP ? 'bg-indigo-100 text-indigo-700' : 'bg-rose-100 text-rose-700'}">${item.SuratPesananP || 'TIDAK ADA'}</span></td>
                     </tr>
                 `;
             }).join('');
