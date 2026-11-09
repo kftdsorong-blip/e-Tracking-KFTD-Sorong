@@ -22,7 +22,6 @@
     <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <!-- Logo Kimia Farma Trading & Distribution -->
                 <div class="bg-white px-3 py-1.5 rounded-lg shadow-sm flex items-center justify-center">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Kimia_Farma_logo.svg" 
                          alt="Kimia Farma Logo" 
@@ -53,7 +52,6 @@
 
         <!-- KPI / Summary Cards Interactive Filter -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-            <!-- Card All -->
             <div onclick="filterKPI('ALL', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all active-kpi">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Semua Faktur</p>
                 <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-faktur">0</h3>
@@ -61,7 +59,6 @@
                 <span class="text-[10px] text-emerald-600 font-medium">Tampilkan Semua</span>
             </div>
 
-            <!-- Card TOP 30 Hari -->
             <div onclick="filterKPI('30', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&lt;= 30 Hari)</p>
                 <h3 class="text-xl font-extrabold text-blue-600 mt-1" id="kpi-30-count">0</h3>
@@ -69,7 +66,6 @@
                 <span class="text-[10px] text-blue-700 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">Proses Lancar</span>
             </div>
 
-            <!-- Card > 45 Hari -->
             <div onclick="filterKPI('45', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 45 Hari)</p>
                 <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-45-count">0</h3>
@@ -77,7 +73,6 @@
                 <span class="text-[10px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Perlu Atensi</span>
             </div>
 
-            <!-- Card > 90 Hari -->
             <div onclick="filterKPI('90', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-rose-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jatuh Tempo (&gt; 90 Hari)</p>
                 <h3 class="text-xl font-extrabold text-rose-600 mt-1" id="kpi-90-count">0</h3>
@@ -85,7 +80,6 @@
                 <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Kritis</span>
             </div>
 
-            <!-- Card Inkaso Ada -->
             <div onclick="filterKPI('INKASO_ADA', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inkaso [Kol Q] (Ada Berkas)</p>
                 <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="kpi-inkaso-ada-count">0</h3>
@@ -93,7 +87,6 @@
                 <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Berkas Ada</span>
             </div>
 
-            <!-- Card Inkaso Tidak Ada -->
             <div onclick="filterKPI('INKASO_TIDAK', this)" class="kpi-card cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hover:border-purple-400 transition-all">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inkaso [Kol Q] (Tidak Ada)</p>
                 <h3 class="text-xl font-extrabold text-purple-600 mt-1" id="kpi-inkaso-tidak-count">0</h3>
@@ -112,12 +105,9 @@
                     <p class="text-xs text-slate-500" id="active-filter-label">Memuat data dari Google Spreadsheet...</p>
                 </div>
                 
-                <!-- Filter Section -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                    <!-- Filter No Billing -->
                     <input type="text" id="filter-billing" oninput="renderInkasoTable()" placeholder="Cari No. Billing..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-44">
                     
-                    <!-- Filter Status Invoice -->
                     <select id="filter-status-invoice" onchange="renderInkasoTable()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
                         <option value="">Semua Status Invoice</option>
                         <option value="BELUM TITIP FAKTUR">BELUM TITIP FAKTUR</option>
@@ -139,9 +129,9 @@
                             <th class="p-3 text-right">PPn (Rp)</th>
                             <th class="p-3">TOP (30 Hari)</th>
                             <th class="p-3 text-center">Umur Faktur</th>
-                            <th class="p-3">Status Pengiriman [Kol N]</th>
-                            <th class="p-3">Tgl Balik Faktur [Kol O]</th>
-                            <th class="p-3">Admin Logistik [Kol P]</th>
+                            <th class="p-3">Status Pengiriman [Kol M]</th>
+                            <th class="p-3">Tgl Balik Faktur [Kol N]</th>
+                            <th class="p-3">Admin Logistik [Kol O]</th>
                             <th class="p-3">Inkaso [Kol Q]</th>
                             <th class="p-3">Date Receive [Kol R]</th>
                             <th class="p-3">Status Invoice [Kol S]</th>
@@ -337,9 +327,9 @@
                                 ${days} Hari
                             </span>
                         </td>
-                        <td class="p-3 text-slate-600 font-medium">${item.StatusPengirimanN || '-'}</td>
-                        <td class="p-3 text-slate-600">${item.TglBalikFaktur || '-'}</td>
-                        <td class="p-3 text-slate-600 font-medium">${item.AdminLogistik || '-'}</td>
+                        <td class="p-3 text-slate-600 font-medium">${item.StatusPengirimanM || '-'}</td>
+                        <td class="p-3 text-slate-600">${item.TglBalikFakturN || '-'}</td>
+                        <td class="p-3 text-slate-600 font-medium">${item.AdminLogistikO || '-'}</td>
                         <td class="p-3 text-slate-600">${inkasoBadge}</td>
                         <td class="p-3 text-slate-600">${item.DateReceive2 || '-'}</td>
                         <td class="p-3 text-slate-600 font-semibold">${item.StatusInvoice || '-'}</td>
